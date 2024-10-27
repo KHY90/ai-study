@@ -38,7 +38,7 @@ def visualize(
 
   return image
 
-IMAGE_FILE = '111.jpg'
+IMAGE_FILE = 'img\111.jpg'
 
 import cv2
 # from google.colab.patches import cv2_imshow
