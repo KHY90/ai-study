@@ -3,22 +3,14 @@
 # import cv2
 # import mediapipe as mp
 # import numpy as np
-
 # reader = easyocr.Reader(['en','ko'])
-
 # app = FastAPI()
-
 # @app.post("/uploadfile/")
 # async def create_upload_file(file: UploadFile):
-
 #     contents = await file.read()
-
 #     rgb_frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.imdecode(np.fromstring(contents, dtype = np.uint8), cv2.IMREAD_COLOR))
-
 #     result = reader.readtext(rgb_frame)
-
 #     print(result)
-
 #     return {"filename": result}
 
 from fastapi import FastAPI, File, UploadFile

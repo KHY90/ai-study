@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/ws');
+
+        const video = document.createElement('video');
+video.width = 640;
+video.height = 480;
+
+// 비디오 스트림 가져오기
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+        video.srcObject = stream;
+        video.play();
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // WebSocket 연결
+        const socket = new WebSocket('ws://localhost:8000/ws');
+
+        socket.onopen = () => {
+            console.log('WebSocket 연결이 열렸습니다.');
+
+            // 프레임을 주기적으로 전송
+            setInterval(() => {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(blob => {
+                    if (blob) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            socket.send(reader.result); // 바이너리 데이터 전송
+                        };
+                        reader.readAsArrayBuffer(blob);
+                    }
+                }, 'image/jpeg');
+            }, 100); // 100ms마다 프레임 캡처
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log(data.results);
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket 오류:', error);
+        };
+    })
+    .catch(error => {
+        console.error('비디오 스트림 오류:', error);
+    });
+
+    </script>
+</body>
+</html>
