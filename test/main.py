@@ -6,13 +6,14 @@ import uvicorn
 # from router.textseti import router as textEmotion_route
 # from router.speech import router as speechEmotion_route
 # from router.voice import router as stt_route
-from router.photo import router as photo_route
+# from router.photo import router as photo_route
+from router.text_sum import router as textsum_route
 
 app = FastAPI()
 
 # router를 app에 등록
 # app.include_router(faceEmotion_route)
-app.include_router(photo_route)
+app.include_router(textsum_route)
 
 @app.get("/")
 def index():
