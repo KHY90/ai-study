@@ -1,30 +1,43 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from dotenv import load_dotenv
+import os
 import openai
+from mangum import Mangum  # Lambda 서버
+from prompt import get_system_prompt  # 분리된 프롬프트 불러오기
 
-# pip install openai
+# .env 파일 로드
+load_dotenv()
 
-openai.api_key = "YOUR_API_KEY"
+# 환경 변수 읽기
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-messages = [
-  {"role": "system", "content": "당신은 친절하고 도움이 되는 AI 어시스턴트입니다."},
-  {"role": "user", "content": "안녕하세요! 오늘 날씨가 어떤지 알려주실 수 있나요?"},
-  {"role": "assistant", "content": "안녕하세요! 오늘은 대체로 맑고 포근한 날씨가 예상됩니다. 낮 최고기온은 22도까지 오르겠네요. 야외 활동하기 좋은 날씨에요. 계획 있으신가요?"},
-  {"role": "user", "content": "딱히 계획은 없는데 이런 날 뭐하면 좋을까요?"}
-]
+# FastAPI 앱 생성
+app = FastAPI()
 
-completion = openai.ChatCompletion.create(
-  model="gpt-4o", 
-  messages=messages
-)
+# 요청 형식을 정의
+class ChatRequest(BaseModel):
+    messages: list
 
-assistant_reply = completion.choices[0].message.content
-print(assistant_reply)
+@app.post("/chat/{role}")
+async def chat(role: str, request: ChatRequest):
+    try:
+        # 역할에 따른 프롬프트 가져오기
+        system_prompt = get_system_prompt(role)
 
-messages.append({"role": "assistant", "content": assistant_reply})
-messages.append({"role": "user", "content": "와 완전 좋은 제안이네요. 그렇게 해야겠어요!"})
+        # 메시지 조합
+        messages = [system_prompt] + request.messages
 
-completion = openai.ChatCompletion.create(
-  model="gpt-4o", 
-  messages=messages
-)
+        # OpenAI API 호출
+        completion = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=messages
+        )
+        reply = completion.choices[0].message.content
+        return {"reply": reply}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-print(completion.choices[0].message.content)
+
+# Lambda 핸들러
+handler = Mangum(app)
