@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+pydantic
+requests
+python-dotenv
+aiohttp
+torch
+transformers
+pytest
+sqlalchemy
+mysql-connector-python
+librosa
+soundfile
+langchain
