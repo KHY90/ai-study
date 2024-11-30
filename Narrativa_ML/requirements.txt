@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+pydantic
+requests
+python-dotenv
+openai==0.28
+langchain
+langchain_community
+boto3
+deep-translator
+uvicorn
+aioboto3
